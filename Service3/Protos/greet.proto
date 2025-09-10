@@ -1,0 +1,15 @@
+﻿syntax = "proto3";
+option csharp_namespace = "Service3";
+package greet;
+
+service GreetService {
+  rpc SayHello (HelloRequest) returns  (stream HelloReply);
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
