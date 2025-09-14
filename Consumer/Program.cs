@@ -4,7 +4,7 @@ using System.Text;
 
 // Creating Connection
 ConnectionFactory factory = new ConnectionFactory();
-factory.Uri = new Uri("amqps://snqsudjh:1tc207xCDHiQUzsCJJTOcrnfaiRBCEM0@moose.rmq.cloudamqp.com/snqsudjh");
+factory.Uri = new Uri("...");
 
 // active connection and channel
 IConnection connection = await factory.CreateConnectionAsync();
