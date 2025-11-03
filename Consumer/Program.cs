@@ -10,6 +10,31 @@ factory.Uri = new Uri("...");
 IConnection connection = await factory.CreateConnectionAsync();
 IChannel channel = await connection.CreateChannelAsync();
 
+/* headers exchange example
+channel.ExchangeDeclareAsync(
+    exchange: "headers-exchange-example",
+    type: ExchangeType.Headers
+    );
+string queueName = channel.QueueDeclareAsync().Result.QueueName;
+channel.QueueBindAsync(
+    queue: queueName,
+    exchange: "headers-exchange-example",
+    routingKey: string.Empty,
+    arguments: new Dictionary<string, object>
+    {
+        { "format", "pdf" },
+        { "shape", "a4" },
+        { "x-match", "any" } // any or all
+    }
+    );
+AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: true,
+    consumer: consumer
+    );
+*/
+/* topic exchange example 
 channel.ExchangeDeclareAsync(
     exchange: "topic-exchange-example",
     type: ExchangeType.Topic
@@ -32,6 +57,7 @@ channel.BasicConsumeAsync(
     autoAck: true,
     consumer: consumer
     );
+*/
 
 /* fanout exchange example
 channel.ExchangeDeclareAsync(

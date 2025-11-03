@@ -9,7 +9,44 @@ factory.Uri = new Uri("...");
 using IConnection connection = await factory.CreateConnectionAsync(); 
 using IChannel channel = await connection.CreateChannelAsync();
 
+/* headers exchange example 
+channel.ExchangeDeclareAsync(
+    exchange: "headers-exchange-example",
+    type: ExchangeType.Headers
+    );
 
+for (int i = 0; i < 100; i++)
+{
+    await Task.Delay(200);
+    byte[] byteMessage = Encoding.UTF8.GetBytes("Hello from RabbitMQ .NET 6 Client! " + i);
+
+    Console.WriteLine("Enter Headers..:");
+    string headersInput = Console.ReadLine();
+
+// x-match hangi özelliklere göre filtreleme yapacağımızı belirler any veya all olabilir any: verilen özelliklerden herhangi biri eşleştiğinde mesajı alır all: verilen tüm özellikler eşleştiğinde mesajı alır
+    channel.BasicPublishAsync(
+        exchange: "headers-exchange-example",
+        routingKey: string.Empty,
+        basicProperties: new BasicProperties
+        {
+            Headers = new Dictionary<string, object>
+            {
+                { "format", headersInput },
+                { "shape", "a4" },
+                { "x-match", "any" } // any or all
+            }
+        }, body: byteMessage
+
+
+       );
+}
+*/
+
+
+
+
+
+/* topic exchange example 
 channel.ExchangeDeclareAsync(
     exchange: "topic-exchange-example",
     type: ExchangeType.Topic
@@ -31,7 +68,7 @@ for(int i=0; i<100; i++)
         );
 
 }
-
+*/
 
 /* usage of * and #
 *.weather: Bu ifade, herhangi bir kelime ile başlayan ve ardından “weather” ile biten routing key değerlerini temsil eder. Örneğin, “usa.weather” veya “europe.weather” gibi.
@@ -87,7 +124,7 @@ while (true)
         exclusive: false,
         durable: true
     );
-    
+
     // publish a message
     // rabbitmq accepts byte arrays, so we need to convert a string message to a byte array
     //byte[] message = Encoding.UTF8.GetBytes("Hello from RabbitMQ .NET 6 Client!");
@@ -96,19 +133,19 @@ while (true)
     //    routingKey: "example-queue",
     //    body: message
     //);
-    
-    
+
+
     for (int i =0; i<100; i++)
     {
         await Task.Delay(500);
         Console.WriteLine(i);
-    
+
         var props = new BasicProperties
         {
             Persistent = true,
             ContentType = "text/plain"
         };
-    
+
         byte[] message = Encoding.UTF8.GetBytes("Hello from RabbitMQ .NET 6 Client! " + i);
         await channel.BasicPublishAsync(
             exchange: "",
