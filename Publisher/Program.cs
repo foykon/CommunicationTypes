@@ -9,6 +9,39 @@ factory.Uri = new Uri("...");
 using IConnection connection = await factory.CreateConnectionAsync(); 
 using IChannel channel = await connection.CreateChannelAsync();
 
+
+channel.ExchangeDeclareAsync(
+    exchange: "topic-exchange-example",
+    type: ExchangeType.Topic
+    );
+
+for(int i=0; i<100; i++)
+{
+    await Task.Delay(200);
+    byte[] byteMessage = Encoding.UTF8.GetBytes("Hello from RabbitMQ .NET 6 Client! " + i);
+
+    Console.Write("Enter Topic..:");
+
+    string topic = Console.ReadLine();
+
+    channel.BasicPublishAsync(
+        exchange: "topic-exchange-example",
+        routingKey: topic,
+        body: byteMessage
+        );
+
+}
+
+
+/* usage of * and #
+*.weather: Bu ifade, herhangi bir kelime ile başlayan ve ardından “weather” ile biten routing key değerlerini temsil eder. Örneğin, “usa.weather” veya “europe.weather” gibi.
+
+#.news: Bu ifade, herhangi bir sayıda kelime ile başlayan ve ardından “news” ile biten routing key değerlerini temsil eder. Örneğin, “usa.news”, “europe.news” veya "xyz.abc.news” gibi.
+
+Aslında her ikisi de aynı şey fakat #. karakterinde birden fazla kelimeyi temsil ederken *. karakteri tek bir kelimeyi temsil ediyor.
+*/
+
+/* fanout exchange example
 channel.ExchangeDeclareAsync(
     exchange: "fanout-exchange-example",
     type: ExchangeType.Fanout
@@ -25,7 +58,7 @@ for (int i = 0; i < 100; i++)
     body: byteMessage
     );
 }
-
+*/
 
 /* direct exchange example
 channel.ExchangeDeclareAsync(
@@ -46,6 +79,7 @@ while (true)
         );
 }
 */
+
 /*  exmple queue publish and declare
     // declare a queue
     await channel.QueueDeclareAsync(

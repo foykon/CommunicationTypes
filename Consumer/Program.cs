@@ -11,6 +11,30 @@ IConnection connection = await factory.CreateConnectionAsync();
 IChannel channel = await connection.CreateChannelAsync();
 
 channel.ExchangeDeclareAsync(
+    exchange: "topic-exchange-example",
+    type: ExchangeType.Topic
+    );
+
+Console.Write("Enter Topic..:");
+string topic = Console.ReadLine();
+
+string queueName = channel.QueueDeclareAsync().Result.QueueName;
+
+channel.QueueBindAsync(
+    queue: queueName,
+    exchange: "topic-exchange-example",
+    routingKey: topic
+    );
+
+AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: true,
+    consumer: consumer
+    );
+
+/* fanout exchange example
+channel.ExchangeDeclareAsync(
     exchange: "fanout-exchange-example",
     type: ExchangeType.Fanout
     );
@@ -37,6 +61,7 @@ channel.BasicConsumeAsync(
     consumer: consumer
     );
 
+*/
 
 /* direct exchange example
 channel.ExchangeDeclareAsync(
@@ -62,8 +87,8 @@ channel.BasicConsumeAsync(
     consumer: consumer
     );  
 */
-/*
-    // declare a queue
+
+/*    // declare a queue
     await channel.QueueDeclareAsync(
         queue: "example-queue",
         exclusive: false, // same as publisher 
@@ -97,6 +122,7 @@ channel.BasicConsumeAsync(
         return Task.CompletedTask; 
     };
 */
+
 consumer.ReceivedAsync += (sender, e) =>
 {
     Console.WriteLine(Encoding.UTF8.GetString(e.Body.Span));
