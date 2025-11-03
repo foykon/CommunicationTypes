@@ -10,6 +10,25 @@ using IConnection connection = await factory.CreateConnectionAsync();
 using IChannel channel = await connection.CreateChannelAsync();
 
 channel.ExchangeDeclareAsync(
+    exchange: "fanout-exchange-example",
+    type: ExchangeType.Fanout
+    );
+
+for (int i = 0; i < 100; i++)
+{
+    await Task.Delay(200);
+    byte[] byteMessage = Encoding.UTF8.GetBytes("Hello from RabbitMQ .NET 6 Client! " + i);
+
+    channel.BasicPublishAsync(
+    exchange: "fanout-exchange-example",
+    routingKey: "", // string.empty for fanout exchange
+    body: byteMessage
+    );
+}
+
+
+/* direct exchange example
+channel.ExchangeDeclareAsync(
     exchange: "direct-exchange-example",
     type: ExchangeType.Direct
     );
@@ -26,7 +45,8 @@ while (true)
         body: byteMessage
         );
 }
-/*  
+*/
+/*  exmple queue publish and declare
     // declare a queue
     await channel.QueueDeclareAsync(
         queue: "example-queue",

@@ -11,6 +11,35 @@ IConnection connection = await factory.CreateConnectionAsync();
 IChannel channel = await connection.CreateChannelAsync();
 
 channel.ExchangeDeclareAsync(
+    exchange: "fanout-exchange-example",
+    type: ExchangeType.Fanout
+    );
+
+Console.WriteLine("kuyruk adını giriniz...");
+string _queueName = Console.ReadLine();
+
+channel.QueueDeclareAsync(
+    queue: _queueName,
+    exclusive: false 
+    );
+
+channel.QueueBindAsync(
+    _queueName,
+    "fanout-exchange-example",
+    string.Empty
+
+    );
+
+AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+channel.BasicConsumeAsync(
+    queue: _queueName,
+    autoAck: true,
+    consumer: consumer
+    );
+
+
+/* direct exchange example
+channel.ExchangeDeclareAsync(
     exchange: "direct-exchange-example",
     type: ExchangeType.Direct
     );
@@ -32,12 +61,7 @@ channel.BasicConsumeAsync(
     autoAck: true,
     consumer: consumer
     );  
-
-consumer.ReceivedAsync += (sender, e) =>
-{
-   Console.WriteLine(Encoding.UTF8.GetString(e.Body.Span));
-    return Task.CompletedTask;
-};
+*/
 /*
     // declare a queue
     await channel.QueueDeclareAsync(
@@ -73,4 +97,10 @@ consumer.ReceivedAsync += (sender, e) =>
         return Task.CompletedTask; 
     };
 */
+consumer.ReceivedAsync += (sender, e) =>
+{
+    Console.WriteLine(Encoding.UTF8.GetString(e.Body.Span));
+    return Task.CompletedTask;
+};
+
 Console.ReadLine();
