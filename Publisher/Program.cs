@@ -9,6 +9,23 @@ factory.Uri = new Uri("...");
 using IConnection connection = await factory.CreateConnectionAsync(); 
 using IChannel channel = await connection.CreateChannelAsync();
 
+string queueName = "example-p2p-queue";
+
+await channel.QueueDeclareAsync(
+    queue: queueName,
+    exclusive: false,
+    durable: false,
+    autoDelete: false
+    );
+
+byte[] message = Encoding.UTF8.GetBytes("Hello P2P");
+
+await channel.BasicPublishAsync(
+    exchange: "",
+    routingKey: queueName,
+    body: message
+    );
+
 /* headers exchange example 
 channel.ExchangeDeclareAsync(
     exchange: "headers-exchange-example",
@@ -41,10 +58,6 @@ for (int i = 0; i < 100; i++)
        );
 }
 */
-
-
-
-
 
 /* topic exchange example 
 channel.ExchangeDeclareAsync(
