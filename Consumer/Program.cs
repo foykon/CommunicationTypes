@@ -10,6 +10,22 @@ factory.Uri = new Uri("...");
 IConnection connection = await factory.CreateConnectionAsync();
 IChannel channel = await connection.CreateChannelAsync();
 
+string queueName = channel.QueueDeclareAsync().Result.QueueName;
+
+channel.QueueBindAsync(
+    queue: queueName,
+    exchange: "example-pub-sub-exchange",
+    routingKey: string.Empty
+    );
+AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+
+channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: true,
+    consumer: consumer
+    );
+
+/* P2P Example 
 string queueName = "example-p2p-queue";
 
 await channel.QueueDeclareAsync(
@@ -25,6 +41,7 @@ channel.BasicConsumeAsync(
     autoAck: true, //false : it reads old messages too
     consumer: consumer
     );
+*/
 
 /* headers exchange example
 channel.ExchangeDeclareAsync(
