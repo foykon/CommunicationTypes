@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using System.Text;
 
 // creating connection
@@ -8,6 +9,53 @@ factory.Uri = new Uri("...");
 // active connection and channel
 using IConnection connection = await factory.CreateConnectionAsync(); 
 using IChannel channel = await connection.CreateChannelAsync();
+
+string reqQueueName = "example-req-res-queue";
+
+channel.QueueDeclareAsync(
+    queue: reqQueueName,
+    exclusive: false,
+    durable: false,
+    autoDelete: false
+    );
+
+string resQueueName = channel.QueueDeclareAsync().Result.QueueName;
+
+var correlationId = Guid.NewGuid().ToString();
+var props = new BasicProperties();
+props.CorrelationId = correlationId;
+props.ReplyTo = resQueueName;
+
+for(int i = 0; i < 100; i++)
+{
+    byte[] byteMessage = Encoding.UTF8.GetBytes("Hello Req-Res " + i);
+    channel.BasicPublishAsync(
+        exchange: "",
+        routingKey: reqQueueName,
+        basicProperties: props,
+        body: byteMessage,
+        mandatory: false // if true and no queue is bound to the routing key, the message will be returned to the sender
+        );
+}
+
+AsyncEventingBasicConsumer  consumer = new AsyncEventingBasicConsumer(channel);
+
+channel.BasicConsumeAsync(
+    queue: resQueueName,
+    autoAck: true,
+    consumer: consumer
+    );
+
+consumer.ReceivedAsync += (sender, e) =>
+{
+    if(e.BasicProperties.CorrelationId == correlationId)
+    {
+        Console.WriteLine("Response : " + Encoding.UTF8.GetString(e.Body.Span));
+    }
+    return Task.CompletedTask;
+
+};
+
 
 /* Work Queue Example
 string queueName = "example-work-queue";

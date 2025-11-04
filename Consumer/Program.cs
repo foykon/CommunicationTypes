@@ -10,6 +10,42 @@ factory.Uri = new Uri("...");
 IConnection connection = await factory.CreateConnectionAsync();
 IChannel channel = await connection.CreateChannelAsync();
 
+string reqQueueName = "example-req-res-queue";
+
+channel.QueueDeclareAsync(
+    queue: reqQueueName,
+    exclusive: false,
+    durable: false,
+    autoDelete: false
+    );
+
+AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+
+channel.BasicConsumeAsync(
+    queue: reqQueueName,
+    autoAck: true,
+    consumer: consumer
+    );
+
+consumer.ReceivedAsync += (sender, e) =>
+{
+    Console.WriteLine(Encoding.UTF8.GetString(e.Body.Span));
+
+    byte[] responseBytes = Encoding.UTF8.GetBytes("Response for " + Encoding.UTF8.GetString(e.Body.Span));
+
+    channel.BasicPublishAsync(
+        exchange: "",
+        routingKey: e.BasicProperties.ReplyTo,
+        basicProperties: new BasicProperties
+        {
+            CorrelationId = e.BasicProperties.CorrelationId
+        },
+        body: responseBytes,
+        mandatory: false
+        );
+    return Task.CompletedTask;
+};
+
 /* Work Queue Example
 string queueName = "example-work-queue";
 
@@ -209,10 +245,6 @@ channel.BasicConsumeAsync(
     };
 */
 
-consumer.ReceivedAsync += (sender, e) =>
-{
-    Console.WriteLine(Encoding.UTF8.GetString(e.Body.Span));
-    return Task.CompletedTask;
-};
+
 
 Console.ReadLine();
