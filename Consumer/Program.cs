@@ -10,6 +10,31 @@ factory.Uri = new Uri("...");
 IConnection connection = await factory.CreateConnectionAsync();
 IChannel channel = await connection.CreateChannelAsync();
 
+/* Work Queue Example
+string queueName = "example-work-queue";
+
+channel.QueueDeclareAsync(
+    queue: queueName,
+    durable: false,
+    exclusive: false,
+    autoDelete: false
+    );
+
+AsyncEventingBasicConsumer consumer = new AsyncEventingBasicConsumer(channel);
+channel.BasicConsumeAsync(
+    queue: queueName,
+    autoAck: true,
+    consumer: consumer
+    );
+
+channel.BasicQosAsync(
+    prefetchSize: 0,  // 0 : unlimited
+    prefetchCount: 1, // 1 : one by one
+    global: false
+    );
+*/
+
+/* Pub-Sub Example
 string queueName = channel.QueueDeclareAsync().Result.QueueName;
 
 channel.QueueBindAsync(
@@ -24,6 +49,7 @@ channel.BasicConsumeAsync(
     autoAck: true,
     consumer: consumer
     );
+*/
 
 /* P2P Example 
 string queueName = "example-p2p-queue";
