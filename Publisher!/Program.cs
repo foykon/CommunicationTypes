@@ -1,24 +1,33 @@
 ﻿using MassTransit;
 using Shared.Messages;
 
-string rabbitMQUri = "...";
+string rabbitMQUri = "amqps://snqsudjh:1tc207xCDHiQUzsCJJTOcrnfaiRBCEM0@moose.rmq.cloudamqp.com/snqsudjh";
 
-string queueName = "sample-queue";
+string requestQueue = "request-queue";
+string responseQueue = "response-queue";
 
 IBusControl bus = Bus.Factory.CreateUsingRabbitMq(factory =>
 {
     factory.Host(rabbitMQUri);
 });
 
-// use send endpoint to send messages to specific queue
-ISendEndpoint sendEndpoint = await bus.GetSendEndpoint(new($"{rabbitMQUri}/{queueName}"));
+ISendEndpoint sendEndpoint = await bus.GetSendEndpoint(new($"{rabbitMQUri}/{requestQueue}"));
 
 Console.WriteLine("Press any key to publish messages :");
 
 string text = Console.ReadLine();
+string no = Guid.NewGuid().ToString();
 
-await sendEndpoint.Send<IMessage>(new ExampleMessage(){
-    Text = text
+await sendEndpoint.Send<IMessage>(new RequestMessage(){
+    Text = text,
+    No = no
 });
+
+Console.WriteLine("Message sent");
+
+
+
+
+
 
 Console.Read();
